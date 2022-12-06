@@ -5,13 +5,15 @@
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
+    using System.IO;
 
     class Program
     {
         static void Main(string[] args)
         {
             Game game = new Game();
-            game.Run();
+
+            game.SelectName();
         }
     }
 
@@ -19,6 +21,7 @@
     {
         public ulong Score { get; private set; }
         public ulong[,] Board { get; private set; }
+        public string Name { get; private set; }
 
         private readonly int nRows;
         private readonly int nCols;
@@ -30,6 +33,14 @@
             this.nRows = this.Board.GetLength(0);
             this.nCols = this.Board.GetLength(1);
             this.Score = 0;
+        }
+
+        public void SelectName()
+        {
+            Console.WriteLine("Entrez Votre Nom: ");
+            string inputName = Console.ReadLine();
+            this.Name = inputName;
+            Run();
         }
 
         public void Run()
@@ -49,11 +60,14 @@
                     using (new ColorOutput(ConsoleColor.Red))
                     {
                         Console.WriteLine("TU A PERDUE!!!");
+                        SaveScore();
+                        showHightScore();
                         break;
                     }
                 }
 
                 Console.WriteLine("Utilise les fleche pour bouger les case. Appuie sur CTRL+C pour quitter.");
+                string[] test = ReadFileHighScore();
                 ConsoleKeyInfo input = Console.ReadKey(true);
                 Console.WriteLine(input.Key.ToString());
 
@@ -264,6 +278,36 @@
             int iSlot = random.Next(0, emptySlots.Count);
             ulong value = random.Next(0, 100) < 95 ? (ulong)2 : (ulong)4;
             Board[emptySlots[iSlot].Item1, emptySlots[iSlot].Item2] = value;
+        }
+
+        private void SaveScore()
+        {
+            string[] HightScore = ReadFileHighScore();
+            string folder = @"C:\Temp\";
+            string fileName = "HighScore.txt";
+            string fullPath = folder + fileName;
+            string result = this.Name + " :" + this.Score;
+            HightScore = HightScore.Append(result).ToArray();
+            File.WriteAllLines(fullPath, HightScore);
+       
+        }
+
+        private string[] ReadFileHighScore()
+        {
+            string[] highScoreContent = File.ReadAllLines(@"C:\Temp\HighScore.txt");
+            
+            
+            return highScoreContent;
+        }
+
+        public void showHightScore()
+        {
+            string[] contentHighScore = ReadFileHighScore();
+            string[] highScore;
+            foreach (string content in contentHighScore)
+            {
+                Console.WriteLine(content);
+            }
         }
 
         #region Utility Classes
